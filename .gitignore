@@ -1,0 +1,7 @@
+*.jsonl
+*.sh
+*.pyc
+data/*
+backup/*
+natural-instructions-master/*
+task_original_backup/*
