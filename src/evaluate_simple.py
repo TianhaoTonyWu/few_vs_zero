@@ -15,7 +15,9 @@ parser.add_argument("-d", "--device", type=str, default="6")
 parser.add_argument("-md", "--mod", type=str, default="GV_trace-test")
 args = parser.parse_args()
 
+# Set system variables
 os.environ["CUDA_VISIBLE_DEVICES"] = args.device
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 # 获取任务和model名称
 task = args.task.split("_")[0]
@@ -44,7 +46,7 @@ output_file = f"{output_folder}/{task}-{args.shot}-shot.jsonl"
 num, correct, accuracy, avg_rougeL = evaluate_results(output_file=output_file, tokenizer=tokenizer, labels=labels, outputs=outputs)
    
 # Record summary
-with open(f"new_result_0809.jsonl","a") as f:
+with open(f"new_result_0813.jsonl","a") as f:
     f.write("----------------------------\n")
     f.write(f"option:{task},mod:{args.mod},task:{task},shot:{args.shot}\n")
     f.write(json.dumps({"num": num, "correct": correct, "acc": accuracy, "avg_rougeL": avg_rougeL}, ensure_ascii=False) + "\n")

@@ -60,6 +60,8 @@ with open(data_path, "r") as f:
 # 加载tokenizer
 tokenizer = AutoTokenizer.from_pretrained(args.model)
 
+# TODO: chat template?
+
 # 处理训练数据并保存token
 if "trace"  not in args.mod:
     train_file = f'/home/wutianhao/project/few_vs_zero/data/data_token/{task}/train_{str(args.shot)}.pkl'
@@ -100,33 +102,6 @@ else:
     os.makedirs(f'/home/wutianhao/project/few_vs_zero/data/data_token/{task}', exist_ok=True)
     with open(train_file, 'wb') as f:
         pickle.dump({"inputs": train_token,"indexs":indexs}, f)
-
-# 处理测试数据并保存token
-test_file = f'/home/wutianhao/project/few_vs_zero/data/data_token/{task}/test_{str(args.shot)}.pkl'
-if os.path.exists(test_file):
-    with open(test_file, 'rb') as f:
-        data = pickle.load(f)
-        test_token = data["inputs"]
-        labels = data["labels"]
-else:
-    test_token = []
-    labels = []
-    progress_bar = tqdm(total=len(test_message), desc='Test Processing data')
-    for i in range(len(test_message)):
-        progress_bar.update(1)
-        message = test_message[i]
-        prompt, output = message[:-1], message[1]
-        template_str = tokenizer.default_chat_template
-        template = Template(template_str)
-        bos_token = ""
-        eos_token = ""
-        result = template.render(messages=prompt, bos_token=bos_token, eos_token=eos_token)
-        test_token.append(tokenizer.encode(result))
-        labels.append(output["content"])
-    progress_bar.close()
-    os.makedirs(f'/home/wutianhao/project/few_vs_zero/data/data_token/{task}', exist_ok=True)
-    with open(test_file, 'wb') as f:
-        pickle.dump({"inputs": test_token, "labels": labels}, f)
 
 ## 加载模型并设置为训练模式
 model = LlamaForCausalLM.from_pretrained(args.model,torch_dtype=torch.bfloat16)

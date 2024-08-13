@@ -75,7 +75,7 @@ def process_and_save_tokens(task, shot, tokenizer):
         train, test = instances[:data_number // 2], instances[data_number // 2:]
         train_message = data_construct(train, instruction, shot=shot)
         test_message = data_construct(test, instruction, shot=shot)
-
+    """
     # Process and save train tokens
     train_file = os.path.join(base_path, task_name, f'train_{shot}.pkl')
     if os.path.exists(train_file):
@@ -95,7 +95,7 @@ def process_and_save_tokens(task, shot, tokenizer):
         os.makedirs(os.path.dirname(train_file), exist_ok=True)
         with open(train_file, 'wb') as f:
             pickle.dump({"inputs": train_token}, f)
-
+    """
     # Process and save test tokens and labels
     test_file = os.path.join(base_path, task_name, f'test_{shot}.pkl')
     if os.path.exists(test_file):
@@ -119,7 +119,8 @@ def process_and_save_tokens(task, shot, tokenizer):
         with open(test_file, 'wb') as f:
             pickle.dump({"inputs": test_token, "labels": labels}, f)
 
-    return train_token, test_token, labels
+    # Train token is never used in current setting
+    return None, test_token, labels
 
 
 

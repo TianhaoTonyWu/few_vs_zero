@@ -22,7 +22,9 @@ parser.add_argument("-md", "--mod", type=str, default="GV_trace-test")
 parser.add_argument("-x", "--multiplier", type=float, default=1.0)
 args = parser.parse_args()
 
+# Set system variables
 os.environ["CUDA_VISIBLE_DEVICES"] = args.device
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 # Derive task name and model base name
 task = args.task.split("_")[0]
@@ -83,7 +85,7 @@ output_file = f"{output_folder}/masked_{task}_{args.task_shot}_{args.multiplier}
 num, correct, accuracy, avg_rougeL = evaluate_results(output_file=output_file, tokenizer=tokenizer, labels=labels, outputs=outputs)
    
 # record summary
-with open("new_result_0809.jsonl", "a") as f:
+with open("new_result_0813.jsonl", "a") as f:
     f.write("----------------------------\n")
     f.write(f"option: {task}, mod: {args.mod}, task: {args.task}, multiplier: {args.multiplier}\n")
     f.write(json.dumps({"num": num, "correct": correct, "acc": accuracy,  "avg_rougeL": avg_rougeL}, ensure_ascii=False) + "\n")
