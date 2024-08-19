@@ -13,11 +13,11 @@ from utils import process_and_save_tokens, evaluate_results
 
 # Parse command-line arguments
 parser = argparse.ArgumentParser()
-parser.add_argument("-m", "--model", type=str, default="/nfs20t/songran/llm/llama-7b-hf-chat")
+parser.add_argument("-m", "--model", type=str, default="/nfs/songran/llm/llama-7b-hf-chat")
 parser.add_argument("-ms", "--mask_shot", type=int, default=5)
 parser.add_argument("-ts", "--task_shot", type=int, default=0)
 parser.add_argument("-t", "--task", type=str, default="task274_overruling_legal_classification.json")
-parser.add_argument("-d", "--device", type=str, default="7")
+parser.add_argument("-d", "--device", type=str, default="6")
 parser.add_argument("-md", "--mod", type=str, default="GV_trace-test")
 parser.add_argument("-x", "--multiplier", type=float, default=1.0)
 args = parser.parse_args()
@@ -85,7 +85,7 @@ output_file = f"{output_folder}/masked_{task}_{args.task_shot}_{args.multiplier}
 num, correct, accuracy, avg_rougeL = evaluate_results(output_file=output_file, tokenizer=tokenizer, labels=labels, outputs=outputs)
    
 # record summary
-with open("new_result_0813.jsonl", "a") as f:
+with open("new_result_0819.jsonl", "a") as f:
     f.write("----------------------------\n")
     f.write(f"option: {task}, mod: {args.mod}, task: {args.task}, multiplier: {args.multiplier}\n")
     f.write(json.dumps({"num": num, "correct": correct, "acc": accuracy,  "avg_rougeL": avg_rougeL}, ensure_ascii=False) + "\n")

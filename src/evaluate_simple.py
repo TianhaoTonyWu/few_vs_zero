@@ -8,7 +8,7 @@ from transformers import AutoTokenizer
 
 # 解析命令行参数
 parser = argparse.ArgumentParser()
-parser.add_argument("-m", "--model", type=str, default="/nfs20t/songran/llm/llama-7b-hf-chat")
+parser.add_argument("-m", "--model", type=str, default="/nfs/songran/llm/llama-7b-hf-chat")
 parser.add_argument("-ts", "--shot", type=int, default=0)
 parser.add_argument("-t", "--task", type=str, default="task274_overruling_legal_classification.json")
 parser.add_argument("-d", "--device", type=str, default="6")
@@ -44,9 +44,9 @@ output_file = f"{output_folder}/{task}-{args.shot}-shot.jsonl"
 
 # evalaute and save results
 num, correct, accuracy, avg_rougeL = evaluate_results(output_file=output_file, tokenizer=tokenizer, labels=labels, outputs=outputs)
-   
+
 # Record summary
-with open(f"new_result_0813.jsonl","a") as f:
+with open(f"new_result_0819.jsonl","a") as f:
     f.write("----------------------------\n")
     f.write(f"option:{task},mod:{args.mod},task:{task},shot:{args.shot}\n")
     f.write(json.dumps({"num": num, "correct": correct, "acc": accuracy, "avg_rougeL": avg_rougeL}, ensure_ascii=False) + "\n")

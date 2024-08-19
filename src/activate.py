@@ -21,9 +21,9 @@ import json
 
 ## 解析参数
 parser = argparse.ArgumentParser()
-parser.add_argument("-m", "--model", type=str, default="/nfs20t/songran/llm/llama-7b-hf-chat")
+parser.add_argument("-m", "--model", type=str, default="/nfs/songran/llm/llama-7b-hf-chat")
 parser.add_argument("-t","--task", type=str, default="task274_overruling_legal_classification.json")
-parser.add_argument("-d","--device",type=str, default="1")
+parser.add_argument("-d","--device",type=str, default="6")
 parser.add_argument("-st","--shot",type=int, default=5)
 parser.add_argument("-md", "--mod", type=str, default="GV_trace-test")
 args = parser.parse_args()

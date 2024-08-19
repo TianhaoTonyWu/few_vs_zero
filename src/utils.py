@@ -61,9 +61,11 @@ def process_and_save_tokens(task, shot, tokenizer):
         labels (list): List of labels corresponding to the test tokens.
     """
 
-    DATA_PATH = "/home/wutianhao/project/few_vs_zero/natural-instructions-master/tasks/"
+    # DATA_PATH = "/home/wutianhao/project/few_vs_zero/natural-instructions-master/tasks/"
+    DATA_PATH = "/home/wutianhao/project/few_vs_zero/task_original_backup"
     base_path='/home/wutianhao/project/few_vs_zero/data/data_token/'
     task_name = task.split("_")[0]
+
 
     # Load data and split into training and test sets
     data_file = os.path.join(DATA_PATH, task)
