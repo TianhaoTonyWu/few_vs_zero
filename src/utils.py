@@ -6,6 +6,7 @@ import pickle
 from tqdm import tqdm
 from jinja2 import Template
 from rouge_score import rouge_scorer
+from transformers import AutoTokenizer
 
 def find_all_sublists(main,sub):
     # 获取子列表的长度
@@ -39,11 +40,11 @@ def data_construct(data, instruction, shot=3):
         out_data.append(messages)
     return out_data
 
-def clean_text(text):
+def clean_text(text : str):
     return text.strip().lower().rstrip(string.punctuation)
 
 
-def process_and_save_tokens(task, shot, tokenizer):
+def process_and_save_tokens(task : str, shot : int, tokenizer: AutoTokenizer):
     """
     Process and save train and test tokens along with labels.
 
@@ -77,6 +78,7 @@ def process_and_save_tokens(task, shot, tokenizer):
         train, test = instances[:data_number // 2], instances[data_number // 2:]
         train_message = data_construct(train, instruction, shot=shot)
         test_message = data_construct(test, instruction, shot=shot)
+        
     """
     # Process and save train tokens
     train_file = os.path.join(base_path, task_name, f'train_{shot}.pkl')

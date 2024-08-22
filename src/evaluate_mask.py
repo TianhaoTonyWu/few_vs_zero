@@ -85,7 +85,7 @@ output_file = f"{output_folder}/masked_{task}_{args.task_shot}_{args.multiplier}
 num, correct, accuracy, avg_rougeL = evaluate_results(output_file=output_file, tokenizer=tokenizer, labels=labels, outputs=outputs)
    
 # record summary
-with open("new_result_0819.jsonl", "a") as f:
+with open("new_result_0822.jsonl", "a") as f:
     f.write("----------------------------\n")
     f.write(f"option: {task}, mod: {args.mod}, task: {args.task}, multiplier: {args.multiplier}\n")
     f.write(json.dumps({"num": num, "correct": correct, "acc": accuracy,  "avg_rougeL": avg_rougeL}, ensure_ascii=False) + "\n")
