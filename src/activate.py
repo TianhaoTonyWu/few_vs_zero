@@ -1,20 +1,13 @@
 from transformers import LlamaForCausalLM, AutoTokenizer
 import torch
-from types import MethodType
 import os
-import torch.nn.functional as F
 from utils import data_construct,find_all_sublists
 from transformers import AutoTokenizer
 import pickle
 from tqdm import tqdm 
 import os
-import random
-from transformers import AutoTokenizer
-# from utils.instructions import INSTRUCTIONS
 from jinja2 import Template
 import pickle
-import numpy as np
-from jinja2 import Template
 import argparse
 import  torch.nn as nn
 import json
@@ -40,14 +33,15 @@ sub_squence_list = [[518, 25580, 29962],[518, 29914, 25580, 29962],[3532, 14816,
 
 ## 设置 CUDA device
 os.environ["CUDA_VISIBLE_DEVICES"] = args.device
-data_path = "/home/wutianhao/project/few_vs_zero/natural-instructions-master/tasks/"
+#DATA_PATH = "/home/wutianhao/project/few_vs_zero/natural-instructions-master/tasks/"
+DATA_PATH = "/home/wutianhao/project/few_vs_zero/task_original_backup"
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # 获取任务名称
 task = args.task.split("_")[0]
 
 # 加载数据并拆分为训练集和测试集
-data_path = os.path.join(data_path, args.task)
+data_path = os.path.join(DATA_PATH, args.task)
 with open(data_path, "r") as f:
     data = json.load(f)
     instruction = data["Definition"]
@@ -59,8 +53,6 @@ with open(data_path, "r") as f:
 
 # 加载tokenizer
 tokenizer = AutoTokenizer.from_pretrained(args.model)
-
-# TODO: chat template?
 
 # 处理训练数据并保存token
 if "trace"  not in args.mod:
