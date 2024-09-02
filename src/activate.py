@@ -84,10 +84,15 @@ else:
         ## 如果是trace模式，则提取子序列的索引
         if "trace" in args.mod:
             input_ids = tokenizer.encode(result)
-            # index_start = find_all_sublists(input_ids,sub_squence_list[0])[1:] # exclude first INST
-            # index_1 = find_all_sublists(input_ids,sub_squence_list[1])[:-1] # exlude last /INST
-            index_start = find_all_sublists(input_ids,sub_squence_list[0])
-            index_1 = find_all_sublists(input_ids,sub_squence_list[1])
+
+            if args.mod == "GV_trace":
+                index_start = find_all_sublists(input_ids,sub_squence_list[0])
+                index_1 = find_all_sublists(input_ids,sub_squence_list[1])
+                
+            elif args.mod == "GV_trace-test":
+                index_start = find_all_sublists(input_ids,sub_squence_list[0])[1:] # exclude first INST
+                index_1 = find_all_sublists(input_ids,sub_squence_list[1])[:-1] # exlude last /INST
+
             track_index = index_start+index_1
             print(len(index_start),len(index_1))
             lat_list = [item for sublist in track_index for item in sublist]
@@ -107,17 +112,15 @@ model.train()
 ## 损失函数
 criterion = nn.CrossEntropyLoss(reduction="none")
 out_data = [[0]*11008]*32
-ss=0
 
 ## 处理训练token并计算梯度
 progress_bar = tqdm(total=len(train_token), desc='Getting data')
 for input_ids,index in zip(train_token, indexs):
     progress_bar.update(1)
-    # print(len(input_ids))
+
     if len(input_ids)>1300:
-        ss+=1
-        # print(ss)
         continue
+
     input_index = [i-1 for i in index]
     label_token = [input_ids[i] for i in index]
 
@@ -134,10 +137,10 @@ for input_ids,index in zip(train_token, indexs):
     model.zero_grad()
 
     loss.backward()
-    # print(loss.item())
+  
     for name, param in model.named_parameters():
         if param.grad is not None and "up_proj" in name:
-            # print(f'name: {name}, grad:\n{param.grad.shape}')
+           
             layer = int(name.split(".")[2])
             grad = torch.sum(param.grad,dim=1).cpu().tolist()
             out_data[layer] =  [abs(a) + b for a, b in zip(grad, out_data[layer])]

@@ -40,7 +40,7 @@ top_indices_2d = torch.stack([
     top_indices // number,  # 行索引
     top_indices % number   # 列索引
 ], dim=1)
-# original_indices = torch.stack((rows, cols), dim=1)
+
 
 # 打印结果
 print("最大的5%的值：", top_values)
@@ -57,7 +57,7 @@ for j in output[0]:
     #     save_output[0].append(torch.tensor(0))
     # else:
     save_output[0].append(torch.tensor(j).type(torch.int64))
-# print(output)
+
 
 
 # 保存结果
@@ -90,7 +90,9 @@ for layer_index, count in enumerate(activation_counts):
 
 print("Total activation counts:", q)
 
-# Plot the distribution as a bar chart
+
+
+### Plot the distribution as a bar chart
 plt.figure(figsize=(10, 6))
 plt.bar(range(layers), activation_counts, color='blue')
 plt.xlabel('Layer')
@@ -103,7 +105,7 @@ plt.savefig(plot_path)
 
 
 
-# Plot Heatmap of the whole matrix
+### Plot Heatmap of the whole matrix
 
 # Reconstruct new matrix containing top 5%
 new_matrix = torch.zeros_like(matrix)
