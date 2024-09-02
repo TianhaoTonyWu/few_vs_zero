@@ -22,6 +22,7 @@ parser.add_argument("-md", "--mod", type=str, default="GV_trace-test")
 args = parser.parse_args()
 basemodel = args.model.split('/')[-1]
 
+
 # 子序列 token
 sub_squence = {
     "[INST]":[518, 25580, 29962],
@@ -30,7 +31,6 @@ sub_squence = {
     "<</SYS>>":[529, 829, 14816, 29903, 6778]
 }
 sub_squence_list = [[518, 25580, 29962],[518, 29914, 25580, 29962],[3532, 14816, 29903, 6778],[529, 829, 14816, 29903, 6778]]
-
 
 
 ## 设置 CUDA device
@@ -84,8 +84,6 @@ else:
         ## 如果是trace模式，则提取子序列的索引
         if "trace" in args.mod:
             input_ids = tokenizer.encode(result)
-            # index_start = find_all_sublists(input_ids,sub_squence_list[0])[1:] # exclude first INST
-            # index_1 = find_all_sublists(input_ids,sub_squence_list[1])[:-1] # exlude last /INST
             index_start = find_all_sublists(input_ids,sub_squence_list[0])
             index_1 = find_all_sublists(input_ids,sub_squence_list[1])
             track_index = index_start+index_1

@@ -86,6 +86,6 @@ num, correct, accuracy, avg_rougeL = evaluate_results(output_file=output_file, t
    
 # record summary
 with open("new_result_0822.jsonl", "a") as f:
-    f.write("----------------------------\n")
-    f.write(f"option: {task}, mod: {args.mod}, task: {args.task}, multiplier: {args.multiplier}\n")
-    f.write(json.dumps({"num": num, "correct": correct, "acc": accuracy,  "avg_rougeL": avg_rougeL}, ensure_ascii=False) + "\n")
+    #f.write("----------------------------\n")
+    #f.write(f"option: {task}, mod: {args.mod}, task: {args.task}, multiplier: {args.multiplier}\n")
+    f.write(json.dumps({"option": task, "mod": args.mod, task: args.task, "multiplier": args.multiplier, "num": num, "correct": correct, "acc": accuracy,  "avg_rougeL": avg_rougeL}, ensure_ascii=False) + "\n")

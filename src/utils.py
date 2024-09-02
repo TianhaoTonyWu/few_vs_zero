@@ -40,6 +40,22 @@ def data_construct(data, instruction, shot=3):
         out_data.append(messages)
     return out_data
 
+def data_construct_new(data, instruction, shot=3):
+    
+    out_data = []
+    instruction = "".join(instruction)
+
+    for i in data:
+        messages = [{"role":"system","content":instruction}]
+        shot_content = random_shot(data, shot=shot)
+        for j in shot_content:
+            messages.append({"role":"user","content":"".join(j["input"])})
+            messages.append({"role":"assistant","content":"".join(j["output"])})
+        messages.append({"role":"user","content":"".join(i["input"])})
+        messages.append({"role":"assistant","content":"".join(i["output"])})
+        out_data.append(messages)
+    return out_data
+
 def clean_text(text : str):
     return text.strip().lower().rstrip(string.punctuation)
 
