@@ -14,8 +14,9 @@ import json
 
 ## 解析参数
 parser = argparse.ArgumentParser()
-parser.add_argument("-m", "--model", type=str, default="/root/autodl-tmp/model")
+parser.add_argument("-m", "--model", type=str, default="/nfs/songran/llm/llama-7b-hf-chat")
 parser.add_argument("-t","--task", type=str, default="task274_overruling_legal_classification.json")
+parser.add_argument("-d","--device",type=str, default="6")
 parser.add_argument("-st","--shot",type=int, default=5)
 parser.add_argument("-md", "--mod", type=str, default="GV_trace-test")
 args = parser.parse_args()
@@ -32,10 +33,11 @@ sub_squence = {
 sub_squence_list = [[518, 25580, 29962],[518, 29914, 25580, 29962],[3532, 14816, 29903, 6778],[529, 829, 14816, 29903, 6778]]
 
 
-
-DATA_PATH = "/root/project/few_vs_zero/task_original_backup"
+## 设置 CUDA device
+os.environ["CUDA_VISIBLE_DEVICES"] = args.device
+#DATA_PATH = "/home/wutianhao/project/few_vs_zero/natural-instructions-master/tasks/"
+DATA_PATH = "/home/wutianhao/project/few_vs_zero/task_original_backup"
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
 
 # 获取任务名称
 task = args.task.split("_")[0]
@@ -56,9 +58,9 @@ tokenizer = AutoTokenizer.from_pretrained(args.model)
 
 # 处理训练数据并保存token
 if "trace"  not in args.mod:
-    train_file = f'/root/project/few_vs_zero/data/data_token/{task}/train_{str(args.shot)}.pkl'
+    train_file = f'/home/wutianhao/project/few_vs_zero/data/data_token/{task}/train_{str(args.shot)}.pkl'
 else:
-    train_file = f'/root/project/few_vs_zero/data/data_token/{task}/train_trace_{str(args.shot)}.pkl'
+    train_file = f'/home/wutianhao/project/few_vs_zero/data/data_token/{task}/train_trace_{str(args.shot)}.pkl'
 if os.path.exists(train_file):
     with open(train_file, 'rb') as f:
         data = pickle.load(f)
@@ -91,15 +93,14 @@ else:
         train_token.append(tokenizer.encode(result))
     
     ## 将token序列化并保存
-    os.makedirs(f'/root/project/few_vs_zero/data/data_token/{task}', exist_ok=True)
+    os.makedirs(f'/home/wutianhao/project/few_vs_zero/data/data_token/{task}', exist_ok=True)
     with open(train_file, 'wb') as f:
         pickle.dump({"inputs": train_token,"indexs":indexs}, f)
 
 ## 加载模型并设置为训练模式
-model = LlamaForCausalLM.from_pretrained(args.model, device_map='auto', torch_dtype=torch.bfloat16)
+model = LlamaForCausalLM.from_pretrained(args.model,torch_dtype=torch.bfloat16)
+model.to(device)
 model.train()
-
-print(model.hf_device_map)
 
 ## 损失函数
 criterion = nn.CrossEntropyLoss(reduction="none")
@@ -110,8 +111,10 @@ ss=0
 progress_bar = tqdm(total=len(train_token), desc='Getting data')
 for input_ids,index in zip(train_token, indexs):
     progress_bar.update(1)
+    # print(len(input_ids))
     if len(input_ids)>1300:
         ss+=1
+        # print(ss)
         continue
     input_index = [i-1 for i in index]
     label_token = [input_ids[i] for i in index]
@@ -124,25 +127,27 @@ for input_ids,index in zip(train_token, indexs):
     loss2 = criterion(output.logits[0, input_index[28:], :], label_token[28:])
 
     # 计算平均损失
+    # loss = loss1.mean()*0.0001 + loss2.mean()
     loss = loss1.mean() + loss2.mean()
     model.zero_grad()
 
     loss.backward()
-
+    # print(loss.item())
     for name, param in model.named_parameters():
         if param.grad is not None and "up_proj" in name:
+            # print(f'name: {name}, grad:\n{param.grad.shape}')
             layer = int(name.split(".")[2])
             grad = torch.sum(param.grad,dim=1).cpu().tolist()
             out_data[layer] =  [abs(a) + b for a, b in zip(grad, out_data[layer])]
 
 # 保存结果
 
-folder_path = f"/root/project/few_vs_zero/data/matrix/{task}/{args.mod}"
+folder_path = f"/home/wutianhao/project/few_vs_zero/data/matrix/{task}/{args.mod}"
 if not os.path.exists(folder_path):
     # 如果不存在，则创建文件夹
     os.makedirs(folder_path)
     print(f"文件夹 {folder_path} 已创建。")
 else:
     print(f"文件夹 {folder_path} 已经存在。")
-with open(f"/root/project/few_vs_zero/data/matrix/{task}/{args.mod}/{args.shot}shot.json","w") as f:
+with open(f"/home/wutianhao/project/few_vs_zero/data/matrix/{task}/{args.mod}/{args.shot}shot.json","w") as f:
     json.dump(out_data,f)
