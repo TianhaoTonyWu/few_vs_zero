@@ -11,15 +11,18 @@ import pickle
 import argparse
 import  torch.nn as nn
 import json
+import chat_template
 
 ## 解析参数
 parser = argparse.ArgumentParser()
 parser.add_argument("-m", "--model", type=str, default="/root/autodl-tmp/model")
 parser.add_argument("-t","--task", type=str, default="task274_overruling_legal_classification.json")
+parser.add_argument("-d","--device",type=str, default="0,1")
 parser.add_argument("-st","--shot",type=int, default=5)
 parser.add_argument("-md", "--mod", type=str, default="GV_trace-test")
 args = parser.parse_args()
 
+os.environ["CUDA_VISIBLE_DEVICES"] = args.device
 
 
 # 子序列 token
@@ -53,7 +56,8 @@ with open(data_path, "r") as f:
 
 # 加载tokenizer
 tokenizer = AutoTokenizer.from_pretrained(args.model)
-
+tokenizer.chat_template = chat_template.ct
+print(tokenizer.get_chat_template())
 # 处理训练数据并保存token
 if "trace"  not in args.mod:
     train_file = f'/root/project/few_vs_zero/data/data_token/{task}/train_{str(args.shot)}.pkl'
@@ -73,7 +77,7 @@ else:
     for i in range(len(train_message)):
         progress_bar.update(1)
         message = train_message[i]
-        template_str = tokenizer.default_chat_template
+        template_str = tokenizer.chat_template
         template = Template(template_str)
         bos_token = ""
         eos_token = ""
@@ -82,8 +86,15 @@ else:
         ## 如果是trace模式，则提取子序列的索引
         if "trace" in args.mod:
             input_ids = tokenizer.encode(result)
-            index_start = find_all_sublists(input_ids,sub_squence_list[0])
-            index_1 = find_all_sublists(input_ids,sub_squence_list[1])
+            if "trace-test" in args.mod:
+                # Every [INST] except 1st
+                index_start = find_all_sublists(input_ids,sub_squence_list[0])[1:]
+                # Every [/INST] except last
+                index_1 = find_all_sublists(input_ids,sub_squence_list[1])[:-1]
+            else:
+                # Default: Every [INST] and every [/INST]
+                index_start = find_all_sublists(input_ids,sub_squence_list[0])
+                index_1 = find_all_sublists(input_ids,sub_squence_list[1])
             track_index = index_start+index_1
             print(len(index_start),len(index_1))
             lat_list = [item for sublist in track_index for item in sublist]
@@ -99,20 +110,19 @@ else:
 model = LlamaForCausalLM.from_pretrained(args.model, device_map='auto', torch_dtype=torch.bfloat16)
 model.train()
 
-print(model.hf_device_map)
 
 ## 损失函数
 criterion = nn.CrossEntropyLoss(reduction="none")
 out_data = [[0]*11008]*32
-ss=0
 
 ## 处理训练token并计算梯度
-progress_bar = tqdm(total=len(train_token), desc='Getting data')
+progress_bar = tqdm(total=len(train_token), leave=True, desc='Getting data')
 for input_ids,index in zip(train_token, indexs):
     progress_bar.update(1)
+
     if len(input_ids)>1300:
-        ss+=1
         continue
+    
     input_index = [i-1 for i in index]
     label_token = [input_ids[i] for i in index]
 

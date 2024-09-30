@@ -8,10 +8,10 @@ from transformers import AutoTokenizer
 
 # 解析命令行参数
 parser = argparse.ArgumentParser()
-parser.add_argument("-m", "--model", type=str, default="/nfs/songran/llm/llama-7b-hf-chat")
+parser.add_argument("-m", "--model", type=str, default="/root/autodl-tmp/model")
 parser.add_argument("-ts", "--shot", type=int, default=0)
 parser.add_argument("-t", "--task", type=str, default="task274_overruling_legal_classification.json")
-parser.add_argument("-d", "--device", type=str, default="6")
+parser.add_argument("-d", "--device", type=str, default="0,1")
 parser.add_argument("-md", "--mod", type=str, default="GV_trace-test")
 args = parser.parse_args()
 
@@ -47,7 +47,4 @@ num, correct, accuracy, avg_rougeL = evaluate_results(output_file=output_file, t
 
 # Record summary
 with open(f"new_result_0822.jsonl","a") as f:
-    #f.write("----------------------------\n")
-    #f.write(f"option:{task},mod:{args.mod},task:{task},shot:{args.shot}\n")
-    #f.write(json.dumps({"num": num, "correct": correct, "acc": accuracy, "avg_rougeL": avg_rougeL}, ensure_ascii=False) + "\n")
-    f.write(json.dumps({"option": task, "mod": args.mod, "task": args.task, "multiplier": args.multiplier, "num": num, "correct": correct, "acc": accuracy,  "avg_rougeL": avg_rougeL}, ensure_ascii=False) + "\n")
+    f.write(json.dumps({"option": task, "mod": args.mod, "task": args.task, "shot": args.shot, "num": num, "correct": correct, "acc": accuracy,  "avg_rougeL": avg_rougeL}, ensure_ascii=False) + "\n")

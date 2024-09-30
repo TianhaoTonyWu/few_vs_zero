@@ -7,6 +7,7 @@ from tqdm import tqdm
 from jinja2 import Template
 from rouge_score import rouge_scorer
 from transformers import AutoTokenizer
+import chat_template
 
 def find_all_sublists(main,sub):
     # 获取子列表的长度
@@ -60,7 +61,7 @@ def clean_text(text : str):
     return text.strip().lower().rstrip(string.punctuation)
 
 
-def process_and_save_tokens(task : str, shot : int, tokenizer: AutoTokenizer):
+def process_and_save_tokens(task : str, shot : int, tokenizer_name: str):
     """
     Process and save train and test tokens along with labels.
 
@@ -78,12 +79,12 @@ def process_and_save_tokens(task : str, shot : int, tokenizer: AutoTokenizer):
         labels (list): List of labels corresponding to the test tokens.
     """
 
-    # DATA_PATH = "/home/wutianhao/project/few_vs_zero/natural-instructions-master/tasks/"
-    DATA_PATH = "/home/wutianhao/project/few_vs_zero/task_original_backup"
-    base_path='/home/wutianhao/project/few_vs_zero/data/data_token/'
+    # DATA_PATH = "/root/project/few_vs_zero/natural-instructions-master/tasks/"
+    DATA_PATH = "/root/project/few_vs_zero/task_original_backup"
+    base_path='/root/project/few_vs_zero/data/data_token/'
     task_name = task.split("_")[0]
-
-
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
+    tokenizer.chat_template = chat_template.ct
     # Load data and split into training and test sets
     data_file = os.path.join(DATA_PATH, task)
     with open(data_file, "r") as f:
@@ -92,7 +93,7 @@ def process_and_save_tokens(task : str, shot : int, tokenizer: AutoTokenizer):
         instances = data["Instances"][:6500]
         data_number = len(instances)
         train, test = instances[:data_number // 2], instances[data_number // 2:]
-        train_message = data_construct(train, instruction, shot=shot)
+        #train_message = data_construct(train, instruction, shot=shot)
         test_message = data_construct(test, instruction, shot=shot)
         
     """
@@ -128,7 +129,7 @@ def process_and_save_tokens(task : str, shot : int, tokenizer: AutoTokenizer):
         for message in test_message:
             progress_bar.update(1)
             prompt, output = message[:-1], message[-1]
-            template_str = tokenizer.default_chat_template
+            template_str = tokenizer.chat_template
             template = Template(template_str)
             result = template.render(messages=prompt, bos_token="", eos_token="")
             test_token.append(tokenizer.encode(result))
@@ -144,7 +145,9 @@ def process_and_save_tokens(task : str, shot : int, tokenizer: AutoTokenizer):
 
 
 
-def evaluate_results(output_file, tokenizer, labels, outputs):
+def evaluate_results(output_file, tokenizer_name, labels, outputs):
+
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
     # 创建 rouge
     scorer = rouge_scorer.RougeScorer(['rougeL'], use_stemmer=True)
 

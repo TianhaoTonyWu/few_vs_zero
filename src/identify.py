@@ -14,7 +14,7 @@ args = parser.parse_args()
 task = args.task.split("_")[0]
 persent = 0.05
 
-path = f"/home/wutianhao/project/few_vs_zero/data/matrix/{task}/{args.mod}/{args.shot}shot.json"
+path = f"/root/project/few_vs_zero/data/matrix/{task}/{args.mod}/{args.shot}shot.json"
 
 with open(path,"r") as f:
     data = json.load(f)
@@ -61,7 +61,7 @@ for j in output[0]:
 
 
 # 保存结果
-folder_path = f"/home/wutianhao/project/few_vs_zero/data/activation_mask/{task}"
+folder_path = f"/root/project/few_vs_zero/data/activation_mask/{task}"
 if not os.path.exists(folder_path):
     # 如果不存在，则创建文件夹
     os.makedirs(folder_path)
